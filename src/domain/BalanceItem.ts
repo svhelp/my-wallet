@@ -1,6 +1,8 @@
 import { Currency } from "./Currency"
+import { Disposition } from "./Disposition"
 
-export interface BalacneItem {
+export interface BalanceItem {
     currency: Currency
+    disposition: Disposition
     amount: number
 }

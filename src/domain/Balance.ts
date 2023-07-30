@@ -1,6 +1,6 @@
-import { BalacneItem } from "./BalanceItem";
+import { BalanceItem } from "./BalanceItem";
 
 export interface Balance {
     date: Date
-    items: BalacneItem[]
+    items: BalanceItem[]
 }
