@@ -1,4 +1,4 @@
-import { Button, Card, FormControl, IconButton, InputLabel, MenuItem, Select, Stack, TextField } from "@mui/material"
+import { Box, Button, FormControl, IconButton, InputLabel, List, ListItem, ListItemText, MenuItem, Paper, Select, TextField } from "@mui/material"
 import { Delete, Add } from '@mui/icons-material';
 import { Balance } from "../../../domain/Balance"
 import { useState } from "react"
@@ -6,6 +6,7 @@ import { DatePicker } from "@mui/x-date-pickers"
 import { Currency } from "../../../domain/Currency"
 import { BalanceItem } from "../../../domain/BalanceItem"
 import { Disposition } from "../../../domain/Disposition";
+import styled from "styled-components";
 
 interface StorypointCreationProps {
     endCreation: () => void
@@ -49,26 +50,16 @@ export const StorypointCreation = ({addItem, endCreation}: StorypointCreationPro
     }
 
     return (
-        <Card>
-            <Stack>
-                <Stack direction="row">
+        <Paper>
+            <Box sx={{ display: 'flex', flexDirection: "column", padding: "16px", gap: "16px" }}>
+                <Box sx={{ display: 'flex', alignItems: "flex-start", justifyContent: "space-evenly" }}>
                     <DatePicker
                         label="Date"
                         value={date}
                         onChange={setDate}
                     />
-                    <Stack>
-                        {items.map(item => (
-                            <Stack direction="row">
-                                <span>{item.currency}</span>
-                                <span>{item.amount}</span>
-                                <IconButton aria-label="delete" size="small" onClick={() => removeItem(item)}>
-                                    <Delete fontSize="small" />
-                                </IconButton>
-                            </Stack>
-                        ))}
-
-                        <Stack direction="row">
+                    <Box sx={{ display: 'flex', flexDirection: "column", gap: "16px" }}>
+                        <Box sx={{ display: 'flex', alignItems: "center" }}>
                             <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
                                 <InputLabel>Currency</InputLabel>
                                 <Select
@@ -88,24 +79,60 @@ export const StorypointCreation = ({addItem, endCreation}: StorypointCreationPro
                             <TextField
                                 label="Amount"
                                 variant="standard"
+                                sx={{ width: '100%', maxWidth: 250 }}
                                 inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                                 value={newAmount}
                                 onChange={event => setNewAmount(event.target.value as unknown as number)} />
                             <IconButton aria-label="delete" size="small" onClick={saveItem}>
                                 <Add fontSize="small" />
                             </IconButton>
-                        </Stack>
-                    </Stack>
-                </Stack>
-                <div>
+                        </Box>
+                        
+                        {items.length > 0 &&
+                            <List sx={{ width: '100%', maxWidth: 250, bgcolor: 'background.paper' }}>
+                                {items.map((item, index) => (
+                                    <ListItem
+                                        key={index}
+                                        disableGutters
+                                        secondaryAction={
+                                            <IconButton aria-label="delete" onClick={() => removeItem(item)}>
+                                                <Delete fontSize="small" />
+                                            </IconButton>
+                                        }
+                                    >
+                                        <ListItemText primary={<span><BoldText>{item.currency}</BoldText>{item.amount}</span>} />
+                                    </ListItem>
+                                ))}
+                            </List>}
+                    </Box>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: "flex-end", gap: "8px" }}>
                     <Button variant="outlined" color="error" onClick={endCreation}>
                         Cancel
                     </Button>
                     <Button variant="contained" onClick={save}>
                         Save
                     </Button>
-                </div>
-            </Stack>
-        </Card>
+                </Box>
+            </Box>
+        </Paper>
     )
 }
+
+const BoldText = styled.div`
+    height: 40px;
+    width: 40px;
+
+    background: #e9e9e9;
+
+    border-radius: 40px;
+
+    padding: 4px;
+    margin: 0 8px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 600;
+`
