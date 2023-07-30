@@ -6,7 +6,7 @@ import { DatePicker } from "@mui/x-date-pickers"
 import { Currency } from "../../../domain/Currency"
 import { BalanceItem } from "../../../domain/BalanceItem"
 import { Disposition } from "../../../domain/Disposition";
-import styled from "styled-components";
+import { CurrencyIcon } from "../../../ui/CurrencyIcon";
 
 interface StorypointCreationProps {
     endCreation: () => void
@@ -100,7 +100,7 @@ export const StorypointCreation = ({addItem, endCreation}: StorypointCreationPro
                                             </IconButton>
                                         }
                                     >
-                                        <ListItemText primary={<span><BoldText>{item.currency}</BoldText>{item.amount}</span>} />
+                                        <ListItemText primary={<span><CurrencyIcon>{item.currency}</CurrencyIcon>{item.amount}</span>} />
                                     </ListItem>
                                 ))}
                             </List>}
@@ -118,21 +118,3 @@ export const StorypointCreation = ({addItem, endCreation}: StorypointCreationPro
         </Paper>
     )
 }
-
-const BoldText = styled.div`
-    height: 40px;
-    width: 40px;
-
-    background: #e9e9e9;
-
-    border-radius: 40px;
-
-    padding: 4px;
-    margin: 0 8px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    font-weight: 600;
-`

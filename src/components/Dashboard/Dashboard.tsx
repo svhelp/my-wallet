@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { StorypointCreation } from "./Storypoint/StorypointCreation"
 import { Budget } from "../../domain/Budget"
 import { Balance } from "../../domain/Balance"
+import { dateTimeReviver } from "../../utilities/dateTimeReviver"
 
 const storageKey = "MyWalletData_1337"
 
@@ -18,7 +19,7 @@ export const Dashboard = () => {
             return
         }
 
-        const savedData: Budget = JSON.parse(savedDataJSON)
+        const savedData: Budget = JSON.parse(savedDataJSON, dateTimeReviver)
 
         setData(savedData)
     }, [])
