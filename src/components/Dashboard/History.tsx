@@ -9,7 +9,7 @@ interface HistoryProps {
 export const History = ({ budget }: HistoryProps) => {
     return (
         <Stack>
-            {budget.history.map(item => <StorypointDisplay item={item} />)}
+            {budget.history.map(item => <StorypointDisplay storypoint={item} />)}
         </Stack>
     )
 }
