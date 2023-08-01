@@ -1,7 +1,7 @@
 import { Button, Container, Stack } from "@mui/material"
 import { History } from "./History"
 import { useState, useEffect } from "react"
-import { StorypointCreation } from "./Storypoint/StorypointCreation"
+import { CreationPanel } from "./Storypoint/Creation/CreationPanel"
 import { Budget } from "../../domain/Budget"
 import { Balance } from "../../domain/Balance"
 import { dateTimeReviver } from "../../utilities/dateTimeReviver"
@@ -57,7 +57,7 @@ export const Dashboard = () => {
             <Stack>
                 {!creationMode && 
                     <Button variant="text" onClick={toggleCreationMode}>Add</Button>}
-                {creationMode && <StorypointCreation endCreation={toggleCreationMode} addItem={addItem} />}
+                {creationMode && <CreationPanel endCreation={toggleCreationMode} addItem={addItem} />}
                 
                 <History budget={data} />
             </Stack>
