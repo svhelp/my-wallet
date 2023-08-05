@@ -1,12 +1,12 @@
 import { Box, Button, IconButton, List, ListItem, ListItemText, Paper } from "@mui/material"
 import { Delete } from '@mui/icons-material';
-import { Balance } from "../../../../domain/Balance"
+import { Balance } from "../../../domain/Balance"
 import { useState } from "react"
 import { DatePicker } from "@mui/x-date-pickers"
-import { Currency } from "../../../../domain/Currency"
-import { BalanceItem } from "../../../../domain/BalanceItem"
-import { Disposition } from "../../../../domain/Disposition";
-import { CurrencyIcon } from "../../../../ui/CurrencyIcon";
+import { Currency } from "../../../domain/Currency"
+import { BalanceItem } from "../../../domain/BalanceItem"
+import { Disposition } from "../../../domain/Disposition";
+import { CurrencyIcon } from "../../../ui/CurrencyIcon";
 import { CurrencyItem } from "./CurrencyItem";
 
 interface CreationPanelProps {

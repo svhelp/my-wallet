@@ -1,6 +1,6 @@
 import { Box, FormControl, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material"
 import { Add } from '@mui/icons-material'
-import { Currency } from "../../../../domain/Currency"
+import { Currency } from "../../../domain/Currency"
 import { useState } from "react"
 
 interface CurrencyItemProps {
