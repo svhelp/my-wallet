@@ -3,22 +3,22 @@ import { Delete } from '@mui/icons-material';
 import { Balance } from "../../../domain/Balance"
 import { useState } from "react"
 import { DatePicker } from "@mui/x-date-pickers"
-import { Currency } from "../../../domain/Currency"
 import { BalanceItem } from "../../../domain/BalanceItem"
 import { Disposition } from "../../../domain/Disposition";
 import { CurrencyIcon } from "../../../ui/CurrencyIcon";
 import { CurrencyItem } from "./CurrencyItem";
 
 interface CreationPanelProps {
+    currencies: { [key: string]: string }
     endCreation: () => void
     addItem: (item: Balance) => void
 }
 
-export const CreationPanel = ({addItem, endCreation}: CreationPanelProps) => {
+export const CreationPanel = ({currencies, addItem, endCreation}: CreationPanelProps) => {
     const [ date, setDate ] = useState<Date | null>()
     const [ items, setItems ] = useState<BalanceItem[]>([])
 
-    const saveItem = (newCurrency: Currency, newAmount: number) => {
+    const saveItem = (newCurrency: string, newAmount: number) => {
         setItems(currentState => ([
             ...currentState,
             {
@@ -56,7 +56,7 @@ export const CreationPanel = ({addItem, endCreation}: CreationPanelProps) => {
                         onChange={setDate}
                     />
                     <Box sx={{ display: 'flex', flexDirection: "column", gap: "16px" }}>
-                        <CurrencyItem saveItem={saveItem} />
+                        <CurrencyItem currencies={currencies} saveItem={saveItem} />
                         
                         {items.length > 0 &&
                             <List sx={{ width: '100%', maxWidth: 250, bgcolor: 'background.paper' }}>

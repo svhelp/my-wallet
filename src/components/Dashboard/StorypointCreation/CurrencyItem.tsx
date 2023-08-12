@@ -1,24 +1,28 @@
 import { Box, FormControl, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material"
 import { Add } from '@mui/icons-material'
-import { Currency } from "../../../domain/Currency"
 import { useState } from "react"
 
 interface CurrencyItemProps {
-    saveItem: (currency: Currency, amount: number) => void
+    currencies: { [key: string]: string }
+    saveItem: (currency: string, amount: number) => void
 }
 
-export const CurrencyItem = ({ saveItem }: CurrencyItemProps) => {
-    const [ currency, setCurrency ] = useState<Currency>(Currency.EUR)
+export const CurrencyItem = ({ currencies, saveItem }: CurrencyItemProps) => {
+    const [ currency, setCurrency ] = useState<string | undefined>()
     const [ amount, setAmount ] = useState(0)
 
     const save = () => {
+        if (!currency) {
+            return
+        }
+        
         saveItem(currency, amount)
 
-        setCurrency(Currency.EUR)
+        setCurrency(undefined)
         setAmount(0)
     }
 
-    const isValid = amount > 0
+    const isValid = currency && amount > 0
     
     return (
         <Box sx={{ display: 'flex', alignItems: "center" }}>
@@ -26,16 +30,11 @@ export const CurrencyItem = ({ saveItem }: CurrencyItemProps) => {
                 <InputLabel>Currency</InputLabel>
                 <Select
                     value={currency}
-                    onChange={(event) => setCurrency(event.target.value as Currency)}
+                    onChange={(event) => setCurrency(event.target.value)}
                     label="Currency"
                 >
-                    <MenuItem value={Currency.AUD}>AUD</MenuItem>
-                    <MenuItem value={Currency.CAD}>CAD</MenuItem>
-                    <MenuItem value={Currency.EUR}>EUR</MenuItem>
-                    <MenuItem value={Currency.RSD}>RSD</MenuItem>
-                    <MenuItem value={Currency.RUB}>RUB</MenuItem>
-                    <MenuItem value={Currency.UAH}>UAH</MenuItem>
-                    <MenuItem value={Currency.USD}>USD</MenuItem>
+                    {Object.entries(currencies).map(([code, name]) =>
+                        <MenuItem value={code}>{name}</MenuItem>)}
                 </Select>
             </FormControl>
             <TextField

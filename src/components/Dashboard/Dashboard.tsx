@@ -4,36 +4,28 @@ import { useState, useEffect } from "react"
 import { CreationPanel } from "./StorypointCreation/CreationPanel"
 import { Budget } from "../../domain/Budget"
 import { Balance } from "../../domain/Balance"
-import { dateTimeReviver } from "../../utilities/dateTimeReviver"
+import { budgetStorageKey } from "../../constants/storageKey"
+import { readDataFromStorage, writeDataToStorage } from "../../utilities/storageProcessor"
 
-const storageKey = "MyWalletData_1337"
+interface DashboardProps {
+    currencies: {[key: string]: string}
+}
 
-export const Dashboard = () => {
+export const Dashboard = ({ currencies }: DashboardProps) => {
     const [ data, setData ] = useState<Budget>({ history: [] })
     const [ creationMode, setCreationMode ] = useState(false)
 
     useEffect(() => {
-        const savedDataJSON = localStorage.getItem(storageKey)
-
-        if (!savedDataJSON) {
-            return
-        }
-
-        const savedData: Budget = JSON.parse(savedDataJSON, dateTimeReviver)
+        const savedData = readDataFromStorage<Budget>(budgetStorageKey) ?? { history: [] }
 
         setData(savedData)
     }, [])
-
-    const saveDataToStorage = (updatedData: Budget) => {
-        const dataToSave = JSON.stringify(updatedData)
-        localStorage.setItem(storageKey, dataToSave)
-    }
 
     const toggleCreationMode = () => setCreationMode(value => !value)
 
     const updateData = (updatedData: Budget) => {
         setData(updatedData)
-        saveDataToStorage(updatedData)
+        writeDataToStorage(budgetStorageKey, updatedData)
     }
 
     const addItem = (item: Balance) => {
@@ -52,12 +44,14 @@ export const Dashboard = () => {
         updateData(updatedData)
     }
 
+
+
     return (
         <Container maxWidth="md">
             <Stack>
                 {!creationMode && 
                     <Button variant="text" onClick={toggleCreationMode}>Add</Button>}
-                {creationMode && <CreationPanel endCreation={toggleCreationMode} addItem={addItem} />}
+                {creationMode && <CreationPanel currencies={currencies} endCreation={toggleCreationMode} addItem={addItem} />}
                 
                 <History budget={data} />
             </Stack>
