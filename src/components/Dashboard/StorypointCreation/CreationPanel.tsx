@@ -47,7 +47,7 @@ export const CreationPanel = ({currencies, addItem, endCreation}: CreationPanelP
     const isValid = !!date && items.length > 0
 
     return (
-        <Paper>
+        <Paper sx={{margin: "16px 0"}}>
             <Box sx={{ display: 'flex', flexDirection: "column", padding: "16px", gap: "16px" }}>
                 <Box sx={{ display: 'flex', alignItems: "flex-start", justifyContent: "space-evenly" }}>
                     <DatePicker

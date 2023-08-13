@@ -8,7 +8,7 @@ interface CurrencyItemProps {
 }
 
 export const CurrencyItem = ({ currencies, saveItem }: CurrencyItemProps) => {
-    const [ currency, setCurrency ] = useState<string | undefined>()
+    const [ currency, setCurrency ] = useState<string>("")
     const [ amount, setAmount ] = useState(0)
 
     const save = () => {
@@ -18,7 +18,7 @@ export const CurrencyItem = ({ currencies, saveItem }: CurrencyItemProps) => {
         
         saveItem(currency, amount)
 
-        setCurrency(undefined)
+        setCurrency("")
         setAmount(0)
     }
 
@@ -33,8 +33,9 @@ export const CurrencyItem = ({ currencies, saveItem }: CurrencyItemProps) => {
                     onChange={(event) => setCurrency(event.target.value)}
                     label="Currency"
                 >
+                    <MenuItem value="">None</MenuItem>
                     {Object.entries(currencies).map(([code, name]) =>
-                        <MenuItem value={code}>{name}</MenuItem>)}
+                        <MenuItem key={code} value={code}>{name}</MenuItem>)}
                 </Select>
             </FormControl>
             <TextField
