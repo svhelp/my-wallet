@@ -9,7 +9,7 @@ import { currenciesStorageKey } from './constants/storageKey';
 import { CachedCurrencies } from './domain/CachedCurrencies';
 import { refreshThreshold } from './constants/timeout';
 import { getCurrencyList } from './api/currencyApi';
-import { Alert, Skeleton } from '@mui/material';
+import { Alert, Container, Skeleton } from '@mui/material';
 
 export default function App() {
   const [ loading, setLoading ] = useState(true)
@@ -62,12 +62,13 @@ export default function App() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      {loading
-        ? <Skeleton variant="rectangular" width={210} height={118} />
-        : loadingError
-          ? <Alert severity="error">{loadingError}</Alert>
-          : <Dashboard currencies={currencies} />}
-      
+      <Container maxWidth="md">
+        {loading
+          ? <Skeleton variant="rectangular" width={210} height={118} />
+          : loadingError
+            ? <Alert severity="error">{loadingError}</Alert>
+            : <Dashboard currencies={currencies} />}
+      </Container>
     </LocalizationProvider>
   );
 }

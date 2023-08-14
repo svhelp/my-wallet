@@ -1,5 +1,5 @@
 
-enum ResponseResult {
+export enum ResponseResult {
     success = "success",
     fail = "fail"
 }

@@ -1,12 +1,16 @@
-import { Box, Button, Container, InputLabel, MenuItem, Paper, Select, Stack, Typography } from "@mui/material"
+import { Alert, Box, Button, InputLabel, MenuItem, Paper, Select, Stack, Typography } from "@mui/material"
 import { History } from "./History/History"
 import { useState, useEffect } from "react"
 import { CreationPanel } from "./StorypointCreation/CreationPanel"
 import { Budget } from "../../domain/Budget"
 import { Balance } from "../../domain/Balance"
-import { budgetStorageKey, configStorageKey } from "../../constants/storageKey"
+import { budgetStorageKey, configStorageKey, ratesHistoryStorageKey } from "../../constants/storageKey"
 import { readDataFromStorage, writeDataToStorage } from "../../utilities/storageProcessor"
 import { Config } from "../../domain/Config"
+import { CachedRatesHistory } from "../../domain/CachedRatesHistory"
+import { CurrencyRatesHistory } from "../../domain/CurrencyRatesHistory"
+import { getHistoricalCurrencyRatio } from "../../api/currencyApi"
+import { ResponseResult } from "../../api/apiModels"
 
 interface DashboardProps {
     currencies: {[key: string]: string}
@@ -14,16 +18,90 @@ interface DashboardProps {
 
 export const Dashboard = ({ currencies }: DashboardProps) => {
     const [ data, setData ] = useState<Budget>({ history: [] })
+    const [ ratesHistory, setRatesHistory ] = useState<CachedRatesHistory>()
     const [ creationMode, setCreationMode ] = useState(false)
     const [ currency, setCurrency ] = useState<string>("")
+
+    const [ errors, setErrors ] = useState<string[]>([])
 
     useEffect(() => {
         const savedConfig = readDataFromStorage<Config>(configStorageKey)
         const savedData = readDataFromStorage<Budget>(budgetStorageKey) ?? { history: [] }
+        const savedRatesHistory = readDataFromStorage<CachedRatesHistory>(ratesHistoryStorageKey) ?? { history: [] }
 
         setData(savedData)
         setCurrency(savedConfig?.targetCurrency ?? "")
+        setRatesHistory(savedRatesHistory)
     }, [])
+
+    const defaultNetworkError = "Network error"
+
+    const loadData = async (itemToUpdate: CurrencyRatesHistory, from: string, to: string, date: Date) => {
+        try {
+            const serviceData = await getHistoricalCurrencyRatio(from, to, date)
+    
+            if (serviceData.status !== 200) {
+                return serviceData.statusText ?? defaultNetworkError
+            }
+    
+            if (serviceData.data.status === ResponseResult.fail) {
+                return serviceData.data.error?.message ?? defaultNetworkError
+            }
+    
+            itemToUpdate.rates[to] = serviceData.data.rates[to]?.rate
+        }
+        catch (e) {
+            return JSON.stringify(e)
+        }
+    }
+
+    // useEffect(() => {
+    //     //todo: add data not loaded state
+    //     if (!currency || !ratesHistory) {
+    //         return
+    //     }
+        
+    //     const updatedRatesHistory = [ ...ratesHistory.history ]
+    //     const fetchingTasks: Promise<string | undefined>[] = []
+
+    //     for (const historyItem of data.history) {
+    //         for (const currencyData of historyItem.items) {
+    //             if (updatedRatesHistory.find(x =>
+    //                     x.date === historyItem.date &&
+    //                     x.currency === currencyData.currency &&
+    //                     x.rates[currency])) {
+    //                 continue
+    //             }
+
+    //             const newItem: CurrencyRatesHistory = {
+    //                 date: historyItem.date,
+    //                 currency: currencyData.currency,
+    //                 rates: {
+    //                     [currency]: ""
+    //                 }
+    //             }
+
+    //             updatedRatesHistory.push(newItem)
+
+    //             const fetchingTask = loadData(newItem, currencyData.currency, currency, historyItem.date)
+    //             fetchingTasks.push(fetchingTask)
+    //         }
+    //     }
+
+    //     Promise.all(fetchingTasks).then((results) => {
+    //         const errors = results
+    //             .map(x => x ?? "")
+    //             .filter(x => !!x)
+
+    //         if (errors.length > 0) {
+    //             setErrors(errors)
+    //             return
+    //         }
+
+    //         setRatesHistory({ history: updatedRatesHistory })
+    //     })
+
+    // }, [ currency, data, ratesHistory ])
 
     const toggleCreationMode = () => setCreationMode(value => !value)
 
@@ -53,41 +131,39 @@ export const Dashboard = ({ currencies }: DashboardProps) => {
         updateData(updatedData)
     }
 
-
-
     return (
-        <Container maxWidth="md">
-            <Stack>
-                <Paper sx={{margin: "16px 0"}}>
-                    <Box sx={{ display: 'flex', flexDirection: "column", padding: "16px" }}>
-                        <Typography variant="h4">
-                            Dashboard
-                        </Typography>
-                        <InputLabel>Target currency</InputLabel>
-                        <Select
-                            sx={{width: "350px"}}
-                            value={currency}
-                            onChange={(event) => updateTargetCurrency(event.target.value)}
-                            label="Currency"
-                        >
-                            <MenuItem value="">None</MenuItem>
-                            {Object.entries(currencies).map(([code, name]) =>
-                                <MenuItem key={code} value={code}>{name}</MenuItem>)}
-                        </Select>
-                    </Box>
-                </Paper>
-                
-                {creationMode && <CreationPanel currencies={currencies} endCreation={toggleCreationMode} addItem={addItem} />}
-                
-                <Box sx={{ display: 'flex', alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+        <Stack>
+            {errors.map((err, index) => <Alert key={index} severity="error">{err}</Alert>)}
+
+            <Paper sx={{margin: "16px 0"}}>
+                <Box sx={{ display: 'flex', flexDirection: "column", padding: "16px" }}>
                     <Typography variant="h4">
-                        History
+                        Dashboard
                     </Typography>
-                    {!creationMode && 
-                        <Button variant="text" onClick={toggleCreationMode}>Add</Button>}
+                    <InputLabel>Target currency</InputLabel>
+                    <Select
+                        sx={{width: "350px"}}
+                        value={currency}
+                        onChange={(event) => updateTargetCurrency(event.target.value)}
+                        label="Currency"
+                    >
+                        <MenuItem value="">None</MenuItem>
+                        {Object.entries(currencies).map(([code, name]) =>
+                            <MenuItem key={code} value={code}>{name}</MenuItem>)}
+                    </Select>
                 </Box>
-                <History budget={data} />
-            </Stack>
-        </Container>
+            </Paper>
+            
+            {creationMode && <CreationPanel currencies={currencies} endCreation={toggleCreationMode} addItem={addItem} />}
+            
+            <Box sx={{ display: 'flex', alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                <Typography variant="h4">
+                    History
+                </Typography>
+                {!creationMode && 
+                    <Button variant="text" onClick={toggleCreationMode}>Add</Button>}
+            </Box>
+            <History budget={data} targetCurrency={currency} ratesHistory={ratesHistory} />
+        </Stack>
     )
 }
