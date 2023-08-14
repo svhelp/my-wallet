@@ -17,7 +17,7 @@ export const ConvertedAmount = ({ storypoint, targetCurrency, ratesHistory }: Co
 
     for (const item of storypoint.items) {
         const rates = ratesHistory?.history.find(x =>
-            x.date === storypoint.date &&
+            x.date.toISOString() === storypoint.date.toISOString() &&
             x.currency === item.currency)
 
         const rate = rates?.rates[targetCurrency]

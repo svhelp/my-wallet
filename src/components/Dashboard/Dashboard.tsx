@@ -55,53 +55,65 @@ export const Dashboard = ({ currencies }: DashboardProps) => {
         }
     }
 
-    // useEffect(() => {
-    //     //todo: add data not loaded state
-    //     if (!currency || !ratesHistory) {
-    //         return
-    //     }
+    useEffect(() => {
+        //todo: add data not loaded state
+        if (!currency || !ratesHistory) {
+            return
+        }
         
-    //     const updatedRatesHistory = [ ...ratesHistory.history ]
-    //     const fetchingTasks: Promise<string | undefined>[] = []
+        const updatedRatesHistory = [ ...ratesHistory.history ]
+        const fetchingTasks: Promise<string | undefined>[] = []
 
-    //     for (const historyItem of data.history) {
-    //         for (const currencyData of historyItem.items) {
-    //             if (updatedRatesHistory.find(x =>
-    //                     x.date === historyItem.date &&
-    //                     x.currency === currencyData.currency &&
-    //                     x.rates[currency])) {
-    //                 continue
-    //             }
+        for (const historyItem of data.history) {
+            for (const currencyData of historyItem.items) {
+                const savedHistoryRatesData = updatedRatesHistory.find(x =>
+                    x.date.toISOString() === historyItem.date.toISOString() &&
+                    x.currency === currencyData.currency)
 
-    //             const newItem: CurrencyRatesHistory = {
-    //                 date: historyItem.date,
-    //                 currency: currencyData.currency,
-    //                 rates: {
-    //                     [currency]: ""
-    //                 }
-    //             }
+                if (savedHistoryRatesData && savedHistoryRatesData.rates[currency]) {
+                    continue
+                }
 
-    //             updatedRatesHistory.push(newItem)
+                let itemToUpdate: CurrencyRatesHistory
 
-    //             const fetchingTask = loadData(newItem, currencyData.currency, currency, historyItem.date)
-    //             fetchingTasks.push(fetchingTask)
-    //         }
-    //     }
+                if (!savedHistoryRatesData) {
+                    itemToUpdate = {
+                        date: historyItem.date,
+                        currency: currencyData.currency,
+                        rates: {}
+                    }
+    
+                    updatedRatesHistory.push(itemToUpdate)
+                } else {
+                    itemToUpdate = savedHistoryRatesData
+                }
 
-    //     Promise.all(fetchingTasks).then((results) => {
-    //         const errors = results
-    //             .map(x => x ?? "")
-    //             .filter(x => !!x)
+                itemToUpdate.rates[currency] = ""
 
-    //         if (errors.length > 0) {
-    //             setErrors(errors)
-    //             return
-    //         }
+                const fetchingTask = loadData(itemToUpdate, currencyData.currency, currency, historyItem.date)
+                fetchingTasks.push(fetchingTask)
+            }
+        }
 
-    //         setRatesHistory({ history: updatedRatesHistory })
-    //     })
+        if (fetchingTasks.length === 0) {
+            return
+        }
 
-    // }, [ currency, data, ratesHistory ])
+        Promise.all(fetchingTasks).then((results) => {
+            const errors = results
+                .map(x => x ?? "")
+                .filter(x => !!x)
+
+            if (errors.length > 0) {
+                setErrors(errors)
+                return
+            }
+
+            setRatesHistory({ history: updatedRatesHistory })
+            writeDataToStorage(ratesHistoryStorageKey, { history: updatedRatesHistory })
+        })
+
+    }, [ currency, data, ratesHistory ])
 
     const toggleCreationMode = () => setCreationMode(value => !value)
 
